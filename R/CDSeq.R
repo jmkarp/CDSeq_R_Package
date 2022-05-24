@@ -30,6 +30,8 @@
 #' 
 #' @param print_progress_msg_to_file print progress message to a text file. Set 1 if need to print progress msg to a file and set 0 if no printing. Default is 0;
 #' 
+#' @param constraints a vector of constraints, equal to 0 if unconstrained or the cell type number to which to constrain this gene
+#' 
 #' @importFrom stats cor
 #' 
 #' @examples 
@@ -67,7 +69,7 @@
 #9. cpu_number:         number of cpu cores that can be used for parellel computing; Default is NULL and CDSeq will detect the available number of cores on the device and use number of all cores - 1 for parallel computing.
 #10.gene_length:        a vector of the effective length (gene length - read length + 1) of each gene; Default is NULL.
 #11.reference_gep:      a reference gene expression profile can be used to determine the cell type and/or estimate beta; Default is NULL.
-
+#12. constraints        a list of constraints, equal to 0 if unconstrained, or the number of the cell type to constrain a gene to
 
 
 
@@ -82,6 +84,7 @@ CDSeq <- function( bulk_data,
                    cpu_number = NULL,
                    gene_length = NULL,
                    reference_gep = NULL,
+                   constraints = NULL,
                    verbose = FALSE,
                    print_progress_msg_to_file = 0) {
 
@@ -194,6 +197,27 @@ CDSeq <- function( bulk_data,
     if(max(cell_type_number)>ncol(reference_gep)){
       rpkm <- 0
       #ref <- 0 # I need to write a more robust cell type assignment function to take care this case
+    }
+  }
+  
+  # check that we have the right number of constraints
+  if(!is.null(constraints)) {
+    if(length(constraints) != nrow(bulk_data))
+    {
+      warning("The number of constraints should equal the number of genes in bulk_data. Constraints will be removed.")
+      constraints <- NULL
+    }  
+    
+    if(any(constraints) > min(cell_type_number))
+    {
+      warning("Constraints must refer to cell types to which a gene should be assigned. Therefore, they cannot take values higher than the number of cell types (or the minimum of cell_type_number). Constraints will be removed.")
+      constraints <- NULL
+    }
+    
+    if(any(constraints %% 1 != 0))
+    {
+        constraints = round(constraints)
+        warning("The constraints input appear to contain non-integers.  CDSeq has rounded up to integers.")
     }
   }
   
@@ -311,7 +335,7 @@ CDSeq <- function( bulk_data,
           
           if(!is.null(beta_est)){beta <- beta_est[i,]}
 
-          result <- gibbsSampler(alpha,beta,bulk_data_blocks[[i]],cell_type_number,mcmc_iterations, printout, Sys.getpid(), i, CDSeq_tmp_log, print_progress_msg_to_file, verbose_int)
+          result <- gibbsSampler(alpha,beta,constraints,bulk_data_blocks[[i]],cell_type_number,mcmc_iterations, printout, Sys.getpid(), i, CDSeq_tmp_log, print_progress_msg_to_file, verbose_int)
           
           #outputs are two vectors. estGEP_vec is gene x cell type; estSSp_vec is sample x cell type
           estGEP_vec<-result$csGEP_vec
