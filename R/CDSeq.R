@@ -491,7 +491,7 @@ CDSeq <- function( bulk_data,
       foreach(i=1:block_number, .combine = 'c') %dopar% {
       if(!is.null(beta_est)){beta <- beta_est[i,]}
       processIDs[j,i] <- Sys.getpid()
-      result <- gibbsSampler(alpha,beta,bulk_data_blocks[[i]],cell_type_number[j],mcmc_iterations, printout, processIDs[j,i], i, CDSeq_tmp_log, print_progress_msg_to_file, verbose_int)
+      result <- gibbsSampler(alpha,beta,constraints,bulk_data_blocks[[i]],cell_type_number[j],mcmc_iterations, printout, processIDs[j,i], i, CDSeq_tmp_log, print_progress_msg_to_file, verbose_int)
 
       #output two vectors. estGEP_vec is gene x cell type; estSSp_vec is sample x cell type
       estGEP_vec<-result$csGEP_vec
