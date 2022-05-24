@@ -9,12 +9,13 @@ using namespace Rcpp;
 
 // gibbsSampler
 List gibbsSampler(double ALPHA, std::vector<double> BETA, std::vector<double> constraints, NumericMatrix mixtureSamples, int T, int NN, int OUTPUT, int processID, int data_block_idx, std::string CDSeq_tmp_log, int write_2_file, int verbose);
-RcppExport SEXP _CDSeq_gibbsSampler(SEXP ALPHASEXP, SEXP BETASEXP, SEXP mixtureSamplesSEXP, SEXP TSEXP, SEXP NNSEXP, SEXP OUTPUTSEXP, SEXP processIDSEXP, SEXP data_block_idxSEXP, SEXP CDSeq_tmp_logSEXP, SEXP write_2_fileSEXP, SEXP verboseSEXP) {
+RcppExport SEXP _CDSeq_gibbsSampler(SEXP ALPHASEXP, SEXP BETASEXP, SEXP constraintsSEXP, SEXP mixtureSamplesSEXP, SEXP TSEXP, SEXP NNSEXP, SEXP OUTPUTSEXP, SEXP processIDSEXP, SEXP data_block_idxSEXP, SEXP CDSeq_tmp_logSEXP, SEXP write_2_fileSEXP, SEXP verboseSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< double >::type ALPHA(ALPHASEXP);
     Rcpp::traits::input_parameter< std::vector<double> >::type BETA(BETASEXP);
+    Rcpp::traits::input_parameter< std::vector<double> >::type constraints(constraintsSEXP);
     Rcpp::traits::input_parameter< NumericMatrix >::type mixtureSamples(mixtureSamplesSEXP);
     Rcpp::traits::input_parameter< int >::type T(TSEXP);
     Rcpp::traits::input_parameter< int >::type NN(NNSEXP);
