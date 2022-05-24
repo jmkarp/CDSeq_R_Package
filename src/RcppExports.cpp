@@ -7,6 +7,11 @@
 
 using namespace Rcpp;
 
+#ifdef RCPP_USE_GLOBAL_ROSTREAM
+Rcpp::Rostream<true>&  Rcpp::Rcout = Rcpp::Rcpp_cout_get();
+Rcpp::Rostream<false>& Rcpp::Rcerr = Rcpp::Rcpp_cerr_get();
+#endif
+
 // gibbsSampler
 List gibbsSampler(double ALPHA, std::vector<double> BETA, std::vector<double> constraints, NumericMatrix mixtureSamples, int T, int NN, int OUTPUT, int processID, int data_block_idx, std::string CDSeq_tmp_log, int write_2_file, int verbose);
 RcppExport SEXP _CDSeq_gibbsSampler(SEXP ALPHASEXP, SEXP BETASEXP, SEXP constraintsSEXP, SEXP mixtureSamplesSEXP, SEXP TSEXP, SEXP NNSEXP, SEXP OUTPUTSEXP, SEXP processIDSEXP, SEXP data_block_idxSEXP, SEXP CDSeq_tmp_logSEXP, SEXP write_2_fileSEXP, SEXP verboseSEXP) {
@@ -62,7 +67,7 @@ END_RCPP
 }
 
 static const R_CallMethodDef CallEntries[] = {
-    {"_CDSeq_gibbsSampler", (DL_FUNC) &_CDSeq_gibbsSampler, 11},
+    {"_CDSeq_gibbsSampler", (DL_FUNC) &_CDSeq_gibbsSampler, 12},
     {"_CDSeq_seedMT", (DL_FUNC) &_CDSeq_seedMT, 1},
     {"_CDSeq_randomMT", (DL_FUNC) &_CDSeq_randomMT, 0},
     {"_CDSeq_hungarian_Rcpp", (DL_FUNC) &_CDSeq_hungarian_Rcpp, 1},
