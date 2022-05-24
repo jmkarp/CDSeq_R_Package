@@ -5,6 +5,7 @@
 #' \code{GibbsSampler} returns estimated GEPs and cell type proportions.
 #' @param ALPHA hyperparameter for cell type proportion.
 #' @param BETA hyperparameter for cell-type-specific GEPs.
+#' @param constraints vector of constraints for Gibbs sampler, equal to zero if no constraint, otherwise the number of the cell type to constraint a gene to
 #' @param mixtureSamples bulk RNA-seq data in form of read counts.
 #' @param T number of cell types.
 #' @param NN number of MCMC iteration.
@@ -15,8 +16,8 @@
 #' @param write_2_file print to progress msg to CDSeq_tmp_log if it is 1, not printing otherwise.
 #' @param verbose if greater than or euqal to 1, then print working progress in console, otherwise do not print in console.
 #' @return random integers  uniformly distributed in 0..(2^32 - 1).
-gibbsSampler <- function(ALPHA, BETA, mixtureSamples, T, NN, OUTPUT, processID, data_block_idx, CDSeq_tmp_log, write_2_file, verbose) {
-    .Call('_CDSeq_gibbsSampler', PACKAGE = 'CDSeq', ALPHA, BETA, mixtureSamples, T, NN, OUTPUT, processID, data_block_idx, CDSeq_tmp_log, write_2_file, verbose)
+gibbsSampler <- function(ALPHA, BETA, constraints, mixtureSamples, T, NN, OUTPUT, processID, data_block_idx, CDSeq_tmp_log, write_2_file, verbose) {
+    .Call('_CDSeq_gibbsSampler', PACKAGE = 'CDSeq', ALPHA, BETA, constraints, mixtureSamples, T, NN, OUTPUT, processID, data_block_idx, CDSeq_tmp_log, write_2_file, verbose)
 }
 
 #' This is the Mersenne Twister random number generator.

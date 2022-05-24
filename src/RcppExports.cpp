@@ -8,7 +8,7 @@
 using namespace Rcpp;
 
 // gibbsSampler
-List gibbsSampler(double ALPHA, std::vector<double> BETA, NumericMatrix mixtureSamples, int T, int NN, int OUTPUT, int processID, int data_block_idx, std::string CDSeq_tmp_log, int write_2_file, int verbose);
+List gibbsSampler(double ALPHA, std::vector<double> BETA, std::vector<double> constraints, NumericMatrix mixtureSamples, int T, int NN, int OUTPUT, int processID, int data_block_idx, std::string CDSeq_tmp_log, int write_2_file, int verbose);
 RcppExport SEXP _CDSeq_gibbsSampler(SEXP ALPHASEXP, SEXP BETASEXP, SEXP mixtureSamplesSEXP, SEXP TSEXP, SEXP NNSEXP, SEXP OUTPUTSEXP, SEXP processIDSEXP, SEXP data_block_idxSEXP, SEXP CDSeq_tmp_logSEXP, SEXP write_2_fileSEXP, SEXP verboseSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
@@ -24,7 +24,7 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< std::string >::type CDSeq_tmp_log(CDSeq_tmp_logSEXP);
     Rcpp::traits::input_parameter< int >::type write_2_file(write_2_fileSEXP);
     Rcpp::traits::input_parameter< int >::type verbose(verboseSEXP);
-    rcpp_result_gen = Rcpp::wrap(gibbsSampler(ALPHA, BETA, mixtureSamples, T, NN, OUTPUT, processID, data_block_idx, CDSeq_tmp_log, write_2_file, verbose));
+    rcpp_result_gen = Rcpp::wrap(gibbsSampler(ALPHA, BETA, constraints, mixtureSamples, T, NN, OUTPUT, processID, data_block_idx, CDSeq_tmp_log, write_2_file, verbose));
     return rcpp_result_gen;
 END_RCPP
 }
