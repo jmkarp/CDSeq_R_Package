@@ -208,7 +208,7 @@ CDSeq <- function( bulk_data,
       constraints <- NULL
     }  
     
-    if(any(constraints) > min(cell_type_number))
+    if(any(constraints > min(cell_type_number)))
     {
       warning("Constraints must refer to cell types to which a gene should be assigned. Therefore, they cannot take values higher than the number of cell types (or the minimum of cell_type_number). Constraints will be removed.")
       constraints <- NULL
