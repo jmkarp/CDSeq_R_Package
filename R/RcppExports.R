@@ -5,7 +5,7 @@
 #' \code{GibbsSampler} returns estimated GEPs and cell type proportions.
 #' @param ALPHA hyperparameter for cell type proportion.
 #' @param BETA hyperparameter for cell-type-specific GEPs.
-#' @param constraints vector containing cell types to which each gene is constrained, or zero if unconstrained.
+#' @param constraints matrix containing cell types to which each gene is constrained, or NULL if unconstrained.
 #' @param mixtureSamples bulk RNA-seq data in form of read counts.
 #' @param T number of cell types.
 #' @param NN number of MCMC iteration.

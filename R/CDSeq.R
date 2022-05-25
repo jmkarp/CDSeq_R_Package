@@ -30,7 +30,10 @@
 #' 
 #' @param print_progress_msg_to_file print progress message to a text file. Set 1 if need to print progress msg to a file and set 0 if no printing. Default is 0;
 #' 
-#' @param constraints a vector of constraints, equal to 0 if unconstrained or the cell type number to which to constrain this gene
+#' @param constraints either NULL for no constraints, or a matrix of dimensions G x T' where G is the number of genes and T' is the 
+#' number of cell types to which there are constraints (must be less or equal to number of cell types, T' <= T). Values in matrix
+#' can range from 0 to 1. The relative probability of assigning gene g to cell type t during Gibbs sampling is multiplied by the value 
+#' in this column. See Andrzejewski and Zhu, 2009.
 #' 
 #' @importFrom stats cor
 #' 
@@ -69,7 +72,8 @@
 #9. cpu_number:         number of cpu cores that can be used for parellel computing; Default is NULL and CDSeq will detect the available number of cores on the device and use number of all cores - 1 for parallel computing.
 #10.gene_length:        a vector of the effective length (gene length - read length + 1) of each gene; Default is NULL.
 #11.reference_gep:      a reference gene expression profile can be used to determine the cell type and/or estimate beta; Default is NULL.
-#12. constraints        a list of constraints, equal to 0 if unconstrained, or the number of the cell type to constrain a gene to
+#12. constraints        a matrix of constraints, equal to NUILL if unconstrained, or a matrix of size G x T' where G is the number of genes
+#                       and T' <= T is the number of cell types for which there are constraints. Constraints range from 0 to 1.
 
 
 
@@ -202,22 +206,17 @@ CDSeq <- function( bulk_data,
   
   # check that we have the right number of constraints
   if(!is.null(constraints)) {
-    if(length(constraints) != nrow(bulk_data))
+    if(nrow(constraints) != nrow(bulk_data))
     {
-      warning("The number of constraints should equal the number of genes in bulk_data. Constraints will be removed.")
+      warning("The number of rows in the constraints matrix should equal the number of genes in bulk_data. Constraints will be removed.")
       constraints <- NULL
     }  
     
-    if(any(constraints > min(cell_type_number)))
+    if(any(constraints > 1 | constraints < 0))
     {
-      warning("Constraints must refer to cell types to which a gene should be assigned. Therefore, they cannot take values higher than the number of cell types (or the minimum of cell_type_number). Constraints will be removed.")
-      constraints <- NULL
-    }
-    
-    if(any(constraints %% 1 != 0))
-    {
-        constraints = round(constraints)
-        warning("The constraints input appear to contain non-integers.  CDSeq has rounded up to integers.")
+        constraints[constraints > 1] <- 1
+        constraints[constraints < 0] <- 0
+        warning("The constraints must be between 0 and 1. Constraints outside this range will be set to 0 or 1.")
     }
   }
   
@@ -335,7 +334,20 @@ CDSeq <- function( bulk_data,
           
           if(!is.null(beta_est)){beta <- beta_est[i,]}
 
-          result <- gibbsSampler(alpha,beta,constraints,bulk_data_blocks[[i]],cell_type_number,mcmc_iterations, printout, Sys.getpid(), i, CDSeq_tmp_log, print_progress_msg_to_file, verbose_int)
+          fullconstraints <- NULL
+          if(ncol(constraints) == cell_type_number)
+          {
+            fullconstraints <- constraints
+          }
+          else if (ncol(constraints) < cell_type_number)
+          {
+            fullconstraints <- cbind(constraints, matrix(rep(0, nrow(constraints) * (cell_type_number - ncol(constraints))), nrow = nrow(constraints)))
+          }
+          else {
+            fullconstraints <- constraints[, 1:cell_type_number]
+          }
+          
+          result <- gibbsSampler(alpha,beta,fullconstraints,bulk_data_blocks[[i]],cell_type_number,mcmc_iterations, printout, Sys.getpid(), i, CDSeq_tmp_log, print_progress_msg_to_file, verbose_int)
           
           #outputs are two vectors. estGEP_vec is gene x cell type; estSSp_vec is sample x cell type
           estGEP_vec<-result$csGEP_vec
@@ -491,7 +503,21 @@ CDSeq <- function( bulk_data,
       foreach(i=1:block_number, .combine = 'c') %dopar% {
       if(!is.null(beta_est)){beta <- beta_est[i,]}
       processIDs[j,i] <- Sys.getpid()
-      result <- gibbsSampler(alpha,beta,constraints,bulk_data_blocks[[i]],cell_type_number[j],mcmc_iterations, printout, processIDs[j,i], i, CDSeq_tmp_log, print_progress_msg_to_file, verbose_int)
+      
+      fullconstraints <- NULL
+      if(ncol(constraints) == cell_type_number[j])
+      {
+        fullconstraints <- constraints
+      }
+      else if (ncol(constraints) < cell_type_number[j])
+      {
+        fullconstraints <- cbind(constraints, matrix(rep(0, nrow(constraints) * (cell_type_number[j] - ncol(constraints))), nrow = nrow(constraints)))
+      }
+      else {
+        fullconstraints <- constraints[, 1:cell_type_number[j]]
+      }
+      
+      result <- gibbsSampler(alpha,beta,fullconstraints,bulk_data_blocks[[i]],cell_type_number[j],mcmc_iterations, printout, processIDs[j,i], i, CDSeq_tmp_log, print_progress_msg_to_file, verbose_int)
 
       #output two vectors. estGEP_vec is gene x cell type; estSSp_vec is sample x cell type
       estGEP_vec<-result$csGEP_vec

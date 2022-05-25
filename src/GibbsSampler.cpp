@@ -19,7 +19,7 @@ using namespace Rcpp;
 //' \code{GibbsSampler} returns estimated GEPs and cell type proportions.
 //' @param ALPHA hyperparameter for cell type proportion.
 //' @param BETA hyperparameter for cell-type-specific GEPs.
-//' @param constraints vector containing cell types to which each gene is constrained, or zero if unconstrained.
+//' @param constraints matrix containing constraint values, or NULL if unconstrained.
 //' @param mixtureSamples bulk RNA-seq data in form of read counts.
 //' @param T number of cell types.
 //' @param NN number of MCMC iteration.
@@ -31,7 +31,7 @@ using namespace Rcpp;
 //' @param verbose if greater than or euqal to 1, then print working progress in console, otherwise do not print in console.
 //' @return random integers  uniformly distributed in 0..(2^32 - 1).
 // [[Rcpp::export]]
-List gibbsSampler(double ALPHA, std::vector<double> BETA, std::vector<double> constraints, NumericMatrix mixtureSamples, int T, int NN, int OUTPUT, int processID, int data_block_idx, std::string CDSeq_tmp_log, int write_2_file, int verbose)
+List gibbsSampler(double ALPHA, std::vector<double> BETA, NumericMatrix constraints, NumericMatrix mixtureSamples, int T, int NN, int OUTPUT, int processID, int data_block_idx, std::string CDSeq_tmp_log, int write_2_file, int verbose)
 {
   //clock_t start,finish; 
   //start=clock();
@@ -39,6 +39,7 @@ List gibbsSampler(double ALPHA, std::vector<double> BETA, std::vector<double> co
    *  initialize variables
    */
   int genes = mixtureSamples.rows(), samples = mixtureSamples.cols(); 
+  
   int n = 0;
   //n = std::accumulate(mixtureSamples.begin(),mixtureSamples.end(),0); 
   vector<unsigned int> sid, gid;// unsigned int for saving space
@@ -126,37 +127,28 @@ List gibbsSampler(double ALPHA, std::vector<double> BETA, std::vector<double> co
       wioffset = wi*T;
       dioffset = di*T;
       
-      if (constraints[wi] > 0) {
-        cellTypeBag[i] = constraints[wi] - 1;
-        csGEP_vec[wioffset + constraints[wi] - 1]++;
-        SSP_vec[dioffset + constraints[wi] - 1]++;
-        cellTypeTot[constraints[wi] - 1]++;
-        cellTypeAssignSplit(wi,di,constraints[wi]-1)++;
+      csGEP_vec[wioffset+cellType]--;
+      SSP_vec[dioffset+cellType]--;
+      
+      totprob = (double) 0;
+      for (j = 0; j < T; j++) {
+        probs[j] = ((double) csGEP_vec[wioffset + j] + (double) BETA[wi])/( (double) cellTypeTot[j]+ (double) WBETA)*( (double) SSP_vec[dioffset+ j] + (double) ALPHA);
+        probs[j] *= constraints(wi, j);
+        totprob += probs[j];
       }
-      else
-      {
-        csGEP_vec[wioffset+cellType]--;
-        SSP_vec[dioffset+cellType]--;
-        
-        totprob = (double) 0;
-        for (j = 0; j < T; j++) {
-          probs[j] = ((double) csGEP_vec[wioffset + j] + (double) BETA[wi])/( (double) cellTypeTot[j]+ (double) WBETA)*( (double) SSP_vec[dioffset+ j] + (double) ALPHA);
-          totprob += probs[j];
-        }
-        // sample a cell type from the distribution
-        r = (double) totprob * (double) randomMT() / (double) 4294967296.0;
-        max = probs[0];
-        cellType = 0;
-        while (r > max) {
-          cellType ++;
-          max += probs[cellType];
-        }
-        cellTypeBag[i] = cellType; // assign current gene read i to cell type j
-        csGEP_vec[wioffset + cellType ]++; // and update counts
-        SSP_vec[dioffset + cellType ]++;
-        cellTypeTot[cellType] ++;
-        cellTypeAssignSplit(wi,di,cellType)++;//keep read-cell-type-assignment for each cell type in each sample
+      // sample a cell type from the distribution
+      r = (double) totprob * (double) randomMT() / (double) 4294967296.0;
+      max = probs[0];
+      cellType = 0;
+      while (r > max) {
+        cellType ++;
+        max += probs[cellType];
       }
+      cellTypeBag[i] = cellType; // assign current gene read i to cell type j
+      csGEP_vec[wioffset + cellType ]++; // and update counts
+      SSP_vec[dioffset + cellType ]++;
+      cellTypeTot[cellType] ++;
+      cellTypeAssignSplit(wi,di,cellType)++;//keep read-cell-type-assignment for each cell type in each sample
     }
   }
   logfile.close();
