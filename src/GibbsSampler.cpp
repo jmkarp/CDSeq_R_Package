@@ -132,30 +132,31 @@ List gibbsSampler(double ALPHA, std::vector<double> BETA, std::vector<double> co
         SSP_vec[dioffset + constraints[wi] - 1]++;
         cellTypeTot[constraints[wi] - 1]++;
         cellTypeAssignSplit(wi,di,constraints[wi]-1)++;
-        continue;
       }
-      
-      csGEP_vec[wioffset+cellType]--;
-      SSP_vec[dioffset+cellType]--;
-      
-      totprob = (double) 0;
-      for (j = 0; j < T; j++) {
-        probs[j] = ((double) csGEP_vec[wioffset + j] + (double) BETA[wi])/( (double) cellTypeTot[j]+ (double) WBETA)*( (double) SSP_vec[dioffset+ j] + (double) ALPHA);
-        totprob += probs[j];
+      else
+      {
+        csGEP_vec[wioffset+cellType]--;
+        SSP_vec[dioffset+cellType]--;
+        
+        totprob = (double) 0;
+        for (j = 0; j < T; j++) {
+          probs[j] = ((double) csGEP_vec[wioffset + j] + (double) BETA[wi])/( (double) cellTypeTot[j]+ (double) WBETA)*( (double) SSP_vec[dioffset+ j] + (double) ALPHA);
+          totprob += probs[j];
+        }
+        // sample a cell type from the distribution
+        r = (double) totprob * (double) randomMT() / (double) 4294967296.0;
+        max = probs[0];
+        cellType = 0;
+        while (r > max) {
+          cellType ++;
+          max += probs[cellType];
+        }
+        cellTypeBag[i] = cellType; // assign current gene read i to cell type j
+        csGEP_vec[wioffset + cellType ]++; // and update counts
+        SSP_vec[dioffset + cellType ]++;
+        cellTypeTot[cellType] ++;
+        cellTypeAssignSplit(wi,di,cellType)++;//keep read-cell-type-assignment for each cell type in each sample
       }
-      // sample a cell type from the distribution
-      r = (double) totprob * (double) randomMT() / (double) 4294967296.0;
-      max = probs[0];
-      cellType = 0;
-      while (r > max) {
-        cellType ++;
-        max += probs[cellType];
-      }
-      cellTypeBag[i] = cellType; // assign current gene read i to cell type j
-      csGEP_vec[wioffset + cellType ]++; // and update counts
-      SSP_vec[dioffset + cellType ]++;
-      cellTypeTot[cellType] ++;
-      cellTypeAssignSplit(wi,di,cellType)++;//keep read-cell-type-assignment for each cell type in each sample
     }
   }
   logfile.close();
