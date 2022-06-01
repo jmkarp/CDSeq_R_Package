@@ -144,7 +144,7 @@ CDSeq <- function( bulk_data,
   
   #check alpha
   if(is.null(alpha)){stop(" Input alpha is missing. alpha should be a positive real number.")}
-  if(length(alpha)>1){stop(" alpha should be a positive real number, not a vector.")}
+  #if(length(alpha)>1){stop(" alpha should be a positive real number, not a vector.")}
   
   #Check cell_type_number
   if(is.null(cell_type_number)){stop(" cell_type_number, the number of cell types, is missing. cell_type_number can be a scalar value or a vector.")}
