@@ -144,6 +144,24 @@ CDSeq <- function( bulk_data,
   
   #check alpha
   if(is.null(alpha)){stop(" Input alpha is missing. alpha should be a positive real number.")}
+  else{
+    if(!is.numeric(alpha) | is.matrix(alpha) | is.data.frame(alpha) ){stop("alpha has to be a real number or a vector of real numbers.")}
+    if(length(alpha)>1 & block_number==1 & length(alpha)!=nrow(bulk_data)){stop("Length of alpha should be equal to total number of genes if alpha is a vector")}
+    if(length(alpha)>1 & block_number>1 & !is.null(gene_subset_size)){ if(length(alpha)!=gene_subset_size) stop("When block_number is greater than 1, alpha should be either a scalar or a vector of length gene_subset_size.")}
+    if(length(alpha)==1){
+      if(block_number>1){
+        alpha <- rep(alpha,gene_subset_size)
+      }else if(block_number==1){
+        if(!is.null(gene_subset_size)){
+          if(gene_subset_size<=nrow(bulk_data)) { alpha <- rep(alpha,gene_subset_size) }
+        }else{
+          alpha <- rep(alpha,nrow(bulk_data))
+        }
+      }else{stop("block_number has to be a positive integer.")}
+      
+    } # Gibbs sampler requires alpha to be a vector for computation
+  }
+  
   #if(length(alpha)>1){stop(" alpha should be a positive real number, not a vector.")}
   
   #Check cell_type_number
