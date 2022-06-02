@@ -142,6 +142,10 @@ CDSeq <- function( bulk_data,
     } # Gibbs sampler requires beta to be a vector for computation
   }
   
+  #Check cell_type_number
+  if(is.null(cell_type_number)){stop(" cell_type_number, the number of cell types, is missing. cell_type_number can be a scalar value or a vector.")}
+  if(sum(cell_type_number<2)>0){stop("cell_type_number, the number of cell types, has to be greater than 2.")}
+  
   #check alpha
   if(is.null(alpha)){stop(" Input alpha is missing. alpha should be a positive real number.")}
   else{
@@ -149,14 +153,7 @@ CDSeq <- function( bulk_data,
     if(length(alpha)>1 & block_number==1 & length(alpha)!=nrow(bulk_data)){stop("Length of alpha should be equal to total number of genes if alpha is a vector")}
     if(length(alpha)>1 & block_number>1 & !is.null(gene_subset_size)){ if(length(alpha)!=gene_subset_size) stop("When block_number is greater than 1, alpha should be either a scalar or a vector of length gene_subset_size.")}
     if(length(alpha)==1){
-      if(block_number>1){
-        alpha <- rep(alpha,gene_subset_size)
-      }else if(block_number==1){
-        if(!is.null(gene_subset_size)){
-          if(gene_subset_size<=nrow(bulk_data)) { alpha <- rep(alpha,gene_subset_size) }
-        }else{
-          alpha <- rep(alpha,nrow(bulk_data))
-        }
+      alpha <- rep(alpha, cell_type_number)
       }else{stop("block_number has to be a positive integer.")}
       
     } # Gibbs sampler requires alpha to be a vector for computation
@@ -164,9 +161,6 @@ CDSeq <- function( bulk_data,
   
   #if(length(alpha)>1){stop(" alpha should be a positive real number, not a vector.")}
   
-  #Check cell_type_number
-  if(is.null(cell_type_number)){stop(" cell_type_number, the number of cell types, is missing. cell_type_number can be a scalar value or a vector.")}
-  if(sum(cell_type_number<2)>0){stop("cell_type_number, the number of cell types, has to be greater than 2.")}
   
   #Check mcmc_iterations
   if(is.null(mcmc_iterations)){stop(" mcmc_iterations, the number of MCMC iterations, is missing.")}
