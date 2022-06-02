@@ -157,7 +157,7 @@ CDSeq <- function( bulk_data,
       }else{stop("block_number has to be a positive integer.")}
       
     } # Gibbs sampler requires alpha to be a vector for computation
-  }
+  
   
   #if(length(alpha)>1){stop(" alpha should be a positive real number, not a vector.")}
   
