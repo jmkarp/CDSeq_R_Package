@@ -358,7 +358,7 @@ CDSeq <- function( bulk_data,
 
           fullconstraints_genes <- NULL
           fullconstraints_samples <- NULL
-          if(ncol(fullconstraints_genes) == cell_type_number)
+          if(ncol(constraints_genes) == cell_type_number)
           {
             fullconstraints_genes <- constraints_genes
           }
@@ -370,7 +370,7 @@ CDSeq <- function( bulk_data,
             fullconstraints_genes <- constraints_genes[, 1:cell_type_number]
           }
       
-          if(ncol(fullconstraints_samples) == cell_type_number)
+          if(ncol(constraints_samples) == cell_type_number)
           {
             fullconstraints_samples <- constraints_samples
           }
