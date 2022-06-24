@@ -13,14 +13,15 @@ Rcpp::Rostream<false>& Rcpp::Rcerr = Rcpp::Rcpp_cerr_get();
 #endif
 
 // gibbsSampler
-List gibbsSampler(double ALPHA, std::vector<double> BETA, NumericMatrix constraints, NumericMatrix mixtureSamples, int T, int NN, int OUTPUT, int processID, int data_block_idx, std::string CDSeq_tmp_log, int write_2_file, int verbose);
-RcppExport SEXP _CDSeq_gibbsSampler(SEXP ALPHASEXP, SEXP BETASEXP, SEXP constraintsSEXP, SEXP mixtureSamplesSEXP, SEXP TSEXP, SEXP NNSEXP, SEXP OUTPUTSEXP, SEXP processIDSEXP, SEXP data_block_idxSEXP, SEXP CDSeq_tmp_logSEXP, SEXP write_2_fileSEXP, SEXP verboseSEXP) {
+List gibbsSampler(double ALPHA, std::vector<double> BETA, NumericMatrix constraints_genes, NumericMatrix constraints_samples, NumericMatrix mixtureSamples, int T, int NN, int OUTPUT, int processID, int data_block_idx, std::string CDSeq_tmp_log, int write_2_file, int verbose);
+RcppExport SEXP _CDSeq_gibbsSampler(SEXP ALPHASEXP, SEXP BETASEXP, SEXP constraints_genesSEXP, SEXP constraints_samplesSEXP, SEXP mixtureSamplesSEXP, SEXP TSEXP, SEXP NNSEXP, SEXP OUTPUTSEXP, SEXP processIDSEXP, SEXP data_block_idxSEXP, SEXP CDSeq_tmp_logSEXP, SEXP write_2_fileSEXP, SEXP verboseSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< double >::type ALPHA(ALPHASEXP);
     Rcpp::traits::input_parameter< std::vector<double> >::type BETA(BETASEXP);
-    Rcpp::traits::input_parameter< NumericMatrix >::type constraints(constraintsSEXP);
+    Rcpp::traits::input_parameter< NumericMatrix >::type constraints_genes(constraints_genesSEXP);
+    Rcpp::traits::input_parameter< NumericMatrix >::type constraints_samples(constraints_samplesSEXP);
     Rcpp::traits::input_parameter< NumericMatrix >::type mixtureSamples(mixtureSamplesSEXP);
     Rcpp::traits::input_parameter< int >::type T(TSEXP);
     Rcpp::traits::input_parameter< int >::type NN(NNSEXP);
@@ -30,7 +31,7 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< std::string >::type CDSeq_tmp_log(CDSeq_tmp_logSEXP);
     Rcpp::traits::input_parameter< int >::type write_2_file(write_2_fileSEXP);
     Rcpp::traits::input_parameter< int >::type verbose(verboseSEXP);
-    rcpp_result_gen = Rcpp::wrap(gibbsSampler(ALPHA, BETA, constraints, mixtureSamples, T, NN, OUTPUT, processID, data_block_idx, CDSeq_tmp_log, write_2_file, verbose));
+    rcpp_result_gen = Rcpp::wrap(gibbsSampler(ALPHA, BETA, constraints_genes, constraints_samples, mixtureSamples, T, NN, OUTPUT, processID, data_block_idx, CDSeq_tmp_log, write_2_file, verbose));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -67,7 +68,7 @@ END_RCPP
 }
 
 static const R_CallMethodDef CallEntries[] = {
-    {"_CDSeq_gibbsSampler", (DL_FUNC) &_CDSeq_gibbsSampler, 12},
+    {"_CDSeq_gibbsSampler", (DL_FUNC) &_CDSeq_gibbsSampler, 13},
     {"_CDSeq_seedMT", (DL_FUNC) &_CDSeq_seedMT, 1},
     {"_CDSeq_randomMT", (DL_FUNC) &_CDSeq_randomMT, 0},
     {"_CDSeq_hungarian_Rcpp", (DL_FUNC) &_CDSeq_hungarian_Rcpp, 1},
