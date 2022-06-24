@@ -19,7 +19,8 @@ using namespace Rcpp;
 //' \code{GibbsSampler} returns estimated GEPs and cell type proportions.
 //' @param ALPHA hyperparameter for cell type proportion.
 //' @param BETA hyperparameter for cell-type-specific GEPs.
-//' @param constraints matrix containing constraint values, or NULL if unconstrained.
+//' @param constraints_genes matrix containing constraint values for genes, or NULL if unconstrained.
+//' @param constraints_samples matrix containing constraint values for samples, or NULL if unconstrained.
 //' @param mixtureSamples bulk RNA-seq data in form of read counts.
 //' @param T number of cell types.
 //' @param NN number of MCMC iteration.
@@ -31,7 +32,7 @@ using namespace Rcpp;
 //' @param verbose if greater than or euqal to 1, then print working progress in console, otherwise do not print in console.
 //' @return random integers  uniformly distributed in 0..(2^32 - 1).
 // [[Rcpp::export]]
-List gibbsSampler(double ALPHA, std::vector<double> BETA, NumericMatrix constraints, NumericMatrix mixtureSamples, int T, int NN, int OUTPUT, int processID, int data_block_idx, std::string CDSeq_tmp_log, int write_2_file, int verbose)
+List gibbsSampler(double ALPHA, std::vector<double> BETA, NumericMatrix constraints_genes, NumericMatrix constraints_samples, NumericMatrix mixtureSamples, int T, int NN, int OUTPUT, int processID, int data_block_idx, std::string CDSeq_tmp_log, int write_2_file, int verbose)
 {
   //clock_t start,finish; 
   //start=clock();
@@ -133,7 +134,8 @@ List gibbsSampler(double ALPHA, std::vector<double> BETA, NumericMatrix constrai
       totprob = (double) 0;
       for (j = 0; j < T; j++) {
         probs[j] = ((double) csGEP_vec[wioffset + j] + (double) BETA[wi])/( (double) cellTypeTot[j]+ (double) WBETA)*( (double) SSP_vec[dioffset+ j] + (double) ALPHA);
-        probs[j] *= constraints(wi, j);
+        probs[j] *= constraints_genes(wi, j);
+        probs[j] *= constraints_samples(di, j);
         totprob += probs[j];
       }
       // sample a cell type from the distribution
